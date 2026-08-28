@@ -1,14 +1,24 @@
 <!doctype html><html lang="en"><head><meta charset="UTF-8"><link rel="icon" type="image/svg+xml" href="./favicon.svg"><meta name="viewport" content="width=device-width,initial-scale=1"><title>应用标题</title><link href="https://lf3-static.bytednsdoc.com/obj/eden-cn/ylcylz_fsph_ryhs/ljhwZthlaukjlkulzlp/feisuda/feisuda.svg" rel="shortcut icon"><style>
-#tap-start{position:fixed;inset:0;z-index:2147483647;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:linear-gradient(160deg,#0f2f6e,#1d4ed8 60%,#3b82f6);color:#fff;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Noto Sans SC","Microsoft YaHei",sans-serif;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none;text-align:center}
-#tap-start .icon{width:84px;height:84px;border-radius:50%;background:rgba(255,255,255,.16);display:flex;align-items:center;justify-content:center;font-size:40px;animation:ts-pulse 1.5s ease-in-out infinite}
-#tap-start .text{font-size:22px;font-weight:600;letter-spacing:3px}
-#tap-start .hint{font-size:13px;opacity:.7}
-@keyframes ts-pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.1);opacity:.8}}
+#sec-titles{position:fixed;inset:0;z-index:2147483646}
+#sec-titles .st{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:radial-gradient(1200px 600px at 50% -10%,#1e4bd8 0%,#0f2f6e 55%,#081b3f 100%);color:#fff;text-align:center;padding:40px 24px;opacity:0;visibility:hidden;transition:opacity .45s ease;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Noto Sans SC","Microsoft YaHei",sans-serif}
+#sec-titles .st.on{opacity:1;visibility:visible}
+#sec-titles .badge{font-size:14px;letter-spacing:4px;padding:7px 18px;border:1px solid rgba(255,255,255,.5);border-radius:999px;opacity:.9}
+#sec-titles .st h1{font-size:clamp(34px,7.5vw,60px);font-weight:700;margin:0;letter-spacing:3px;line-height:1.25;text-shadow:0 4px 24px rgba(0,0,0,.35)}
+#sec-titles .st .sub{font-size:clamp(15px,3.2vw,20px);opacity:.85;max-width:640px;line-height:1.6}
+#sec-titles .hint{position:absolute;bottom:34px;left:0;right:0;font-size:13px;opacity:.7;animation:st-fade 1.2s ease .5s both}
+@keyframes st-fade{to{opacity:0}}
 </style>
 <script>
 (function(){
   var isTouch=('ontouchstart' in window)||(navigator.maxTouchPoints>0)||(window.matchMedia&&window.matchMedia('(pointer:coarse)').matches);
-  if(!isTouch)return;
+  /* ===== 四个板块片头（标题文字发我后替换） ===== */
+  var SECTIONS=[
+    {t:'情景一',s:'副标题待定 · 发我真实标题后替换'},
+    {t:'情景二',s:'副标题待定 · 发我真实标题后替换'},
+    {t:'情景三',s:'副标题待定 · 发我真实标题后替换'},
+    {t:'情景四',s:'副标题待定 · 发我真实标题后替换'}
+  ];
+  /* 音频解锁（手机自动播放限制） */
   var ctxs=[],AC=window.AudioContext||window.webkitAudioContext;
   if(AC){var Orig=AC,Patched=function(){var a=[].slice.call(arguments),C=Orig.bind.apply(Orig,[null].concat(a)),c=new C();ctxs.push(c);return c;};Patched.prototype=Orig.prototype;window.AudioContext=Patched;if(window.webkitAudioContext)window.webkitAudioContext=Patched;}
   function unlock(){
@@ -25,32 +35,54 @@
     try{t.dispatchEvent(new KeyboardEvent('keydown',opts));}catch(e){}
     try{t.dispatchEvent(new KeyboardEvent('keyup',opts));}catch(e){}
   }
-  function dismissOverlay(){
-    var o=document.getElementById('tap-start');
-    if(o&&o.parentNode)o.parentNode.removeChild(o);
+  /* 构建四个片头页 */
+  var root=document.createElement('div');
+  root.id='sec-titles';
+  SECTIONS.forEach(function(sec,i){
+    var d=document.createElement('div');
+    d.className='st';
+    d.innerHTML='<span class="badge">反诈情景互动 · 第'+(i+1)+'部分</span><h1>'+sec.t+'</h1><div class="sub">'+sec.s+'</div><div class="hint">'+(isTouch?'单击 进入内容 · 双击 下一片头':'空格 进入内容 · T键 下一片头')+'</div>';
+    root.appendChild(d);
+  });
+  var cur=-1; /* -1 = 片头隐藏，显示应用内容 */
+  function showTitle(i){
+    var cards=root.querySelectorAll('.st');
+    for(var k=0;k<cards.length;k++)cards[k].classList.remove('on');
+    if(i>=0)cards[i].classList.add('on');
+    cur=i;
   }
-  var overlay=document.createElement('div');
-  overlay.id='tap-start';
-  overlay.innerHTML='<div class="icon">👆</div><div class="text">轻触屏幕开始</div><div class="hint">相当于键盘上的空格键，继续播放请再点屏幕</div>';
-  function mount(){if(!document.getElementById('tap-start'))document.body.appendChild(overlay);}
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount);else mount();
-  var firstGesture=false;
-  function handleGesture(x,y){
-    var first=!firstGesture;firstGesture=true;
-    if(first)dismissOverlay();
+  function nextTitle(){ showTitle(cur<3?cur+1:-1); }
+  function mount(){ if(!root.parentNode)document.body.appendChild(root); }
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',function(){mount();showTitle(0);});
+  }else{mount();showTitle(0);}
+  /* 桌面键盘 */
+  document.addEventListener('keydown',function(e){
     unlock();
+    if(e.code==='Space'){
+      if(cur>=0){e.preventDefault();e.stopImmediatePropagation();showTitle(-1);}
+      return;
+    }
+    if(e.code==='Tab'||e.key==='t'||e.key==='T'){e.preventDefault();e.stopImmediatePropagation();nextTitle();}
+  });
+  /* 单击=隐藏片头/空格推进，双击=下一片头（点击事件，手机桌面通用） */
+  var lastTap=0,tapTimer=null;
+  function onTap(x,y){
+    if(cur>=0){showTitle(-1);return;}
     var el=document.elementFromPoint(x,y);
     var interactive=el&&el.closest&&el.closest('button,a,input,select,textarea,[role="button"],[contenteditable="true"]');
-    if(first||!interactive)pressSpace();
+    if(!interactive)pressSpace();
   }
-  document.addEventListener('touchstart',function(ev){
-    var pt=ev.touches&&ev.touches[0]||(ev.changedTouches&&ev.changedTouches[0]);
-    handleGesture(pt?pt.clientX:window.innerWidth/2,pt?pt.clientY:window.innerHeight/2);
-  },{passive:true});
   document.addEventListener('click',function(ev){
-    if(firstGesture)return;
-    handleGesture(ev.clientX,ev.clientY);
-  },{once:true});
+    unlock();
+    var now=Date.now();
+    if(now-lastTap<320){ if(tapTimer){clearTimeout(tapTimer);tapTimer=null;} lastTap=0; nextTitle(); return; }
+    lastTap=now;
+    if(tapTimer)clearTimeout(tapTimer);
+    var x=ev.clientX,y=ev.clientY;
+    tapTimer=setTimeout(function(){tapTimer=null;onTap(x,y);},320);
+  });
+  document.addEventListener('touchstart',function(){unlock();},{passive:true});
 })();
 </script>
 <script src="./assets/index-DLWvtT91.js" defer="defer"></script></head><body><div id="root"></div></body></html>
