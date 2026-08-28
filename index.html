@@ -18,37 +18,39 @@
       if(m.paused&&m.currentTime===0){var p=m.play();if(p&&p.catch)p.catch(function(){});}
     });
   }
-  function tapStartControl(){
-    var els=document.querySelectorAll('button,[role="button"],.ant-btn');
-    for(var i=0;i<els.length;i++){
-      var t=(els[i].textContent||'').trim();
-      if(t&&/^(开始|播放|进入|启动|继续)/.test(t)){try{els[i].click();}catch(e){}break;}
-    }
+  /* 模拟按下空格键：手机没有键盘，触摸屏幕 = 按空格 */
+  function pressSpace(){
+    var opts={bubbles:true,cancelable:true,composed:true,code:'Space',key:' ',keyCode:32,which:32,charCode:32};
+    var t=document.body||document;
+    try{t.dispatchEvent(new KeyboardEvent('keydown',opts));}catch(e){}
+    try{t.dispatchEvent(new KeyboardEvent('keyup',opts));}catch(e){}
   }
   function dismissOverlay(){
     var o=document.getElementById('tap-start');
     if(o&&o.parentNode)o.parentNode.removeChild(o);
-    unlock();
   }
   var overlay=document.createElement('div');
   overlay.id='tap-start';
-  overlay.innerHTML='<div class="icon">👆</div><div class="text">轻触屏幕开始</div><div class="hint">点击屏幕任意位置开始播放</div>';
+  overlay.innerHTML='<div class="icon">👆</div><div class="text">轻触屏幕开始</div><div class="hint">相当于键盘上的空格键，继续播放请再点屏幕</div>';
   function mount(){if(!document.getElementById('tap-start'))document.body.appendChild(overlay);}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount);else mount();
-  var started=false;
+  var firstGesture=false;
+  function handleGesture(x,y){
+    var first=!firstGesture;firstGesture=true;
+    if(first)dismissOverlay();
+    unlock();
+    var el=document.elementFromPoint(x,y);
+    var interactive=el&&el.closest&&el.closest('button,a,input,select,textarea,[role="button"],[contenteditable="true"]');
+    if(first||!interactive)pressSpace();
+  }
   document.addEventListener('touchstart',function(ev){
-    if(started)return;started=true;
     var pt=ev.touches&&ev.touches[0]||(ev.changedTouches&&ev.changedTouches[0]);
-    var x=pt?pt.clientX:window.innerWidth/2,y=pt?pt.clientY:window.innerHeight/2;
-    dismissOverlay();
-    setTimeout(function(){
-      var el=document.elementFromPoint(x,y);
-      var isStart=el&&/^(开始|播放|进入|启动|继续)/.test((el.textContent||'').trim());
-      if(!isStart)tapStartControl();
-    },0);
-  },{once:true,passive:true});
-  document.addEventListener('click',function(){dismissOverlay();},{once:true});
-  document.addEventListener('touchstart',function(){unlock();},{passive:true});
+    handleGesture(pt?pt.clientX:window.innerWidth/2,pt?pt.clientY:window.innerHeight/2);
+  },{passive:true});
+  document.addEventListener('click',function(ev){
+    if(firstGesture)return;
+    handleGesture(ev.clientX,ev.clientY);
+  },{once:true});
 })();
 </script>
 <script src="./assets/index-DLWvtT91.js" defer="defer"></script></head><body><div id="root"></div></body></html>
