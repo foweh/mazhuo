@@ -93,12 +93,16 @@
         getFile: function (url) {
           return fetch(url).then(function (r) {
             if (!r.ok) throw new Error('HTTP ' + r.status + ' (' + url + ')');
-            return r.text();
+            return {
+              getContentData: function (asBinary) {
+                return asBinary ? r.arrayBuffer() : r.text();
+              }
+            };
           });
         },
         addStyle: true
       };
-      var App = loader.defineAsyncComponent(function () {
+      var App = Vue.defineAsyncComponent(function () {
         return loader.loadModule('./ChatPage.vue', options);
       });
       Vue.createApp({ render: function () { return Vue.h(App); } }).mount('#app');
