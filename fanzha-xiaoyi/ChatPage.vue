@@ -5,17 +5,7 @@
     <header class="fz-header">
       <div class="fz-h-left">
         <div class="fz-mascot" aria-hidden="true">
-          <svg viewBox="0 0 64 64" width="44" height="44">
-            <circle cx="14" cy="18" r="9" fill="#6FA8F0"/><circle cx="50" cy="18" r="9" fill="#6FA8F0"/>
-            <circle cx="14" cy="18" r="4.5" fill="#FFD9A8"/><circle cx="50" cy="18" r="4.5" fill="#FFD9A8"/>
-            <circle cx="32" cy="36" r="22" fill="#6FA8F0"/>
-            <ellipse cx="32" cy="43" rx="11" ry="9" fill="#FFF6E8"/>
-            <circle cx="24" cy="33" r="3" fill="#2E3A4D"/><circle cx="40" cy="33" r="3" fill="#2E3A4D"/>
-            <circle cx="24.9" cy="31.9" r="1.1" fill="#fff"/><circle cx="40.9" cy="31.9" r="1.1" fill="#fff"/>
-            <ellipse cx="32" cy="42" rx="2.4" ry="1.8" fill="#2E3A4D"/>
-            <path d="M26 47 q6 5 12 0" stroke="#2E3A4D" stroke-width="2" fill="none" stroke-linecap="round"/>
-            <circle cx="17" cy="31" r="2.6" fill="#FF9F9F" opacity=".8"/><circle cx="47" cy="31" r="2.6" fill="#FF9F9F" opacity=".8"/>
-          </svg>
+          <img class="fz-mascot-img" src="./avatar.jpg" alt="反诈小易" />
         </div>
         <div class="fz-h-info">
           <div class="fz-h-name">反诈小易<span class="fz-h-badge">校园反诈智能体</span></div>
@@ -44,16 +34,7 @@
     <main class="fz-body" ref="bodyRef">
       <div v-for="(m, i) in messages" :key="i" class="fz-row" :class="m.role">
         <div v-if="m.role === 'assistant'" class="fz-avatar fz-avatar-bot" aria-hidden="true">
-          <svg viewBox="0 0 64 64" width="30" height="30">
-            <circle cx="14" cy="18" r="9" fill="#6FA8F0"/><circle cx="50" cy="18" r="9" fill="#6FA8F0"/>
-            <circle cx="14" cy="18" r="4.5" fill="#FFD9A8"/><circle cx="50" cy="18" r="4.5" fill="#FFD9A8"/>
-            <circle cx="32" cy="36" r="22" fill="#6FA8F0"/>
-            <ellipse cx="32" cy="43" rx="11" ry="9" fill="#FFF6E8"/>
-            <circle cx="24" cy="33" r="3" fill="#2E3A4D"/><circle cx="40" cy="33" r="3" fill="#2E3A4D"/>
-            <circle cx="24.9" cy="31.9" r="1.1" fill="#fff"/><circle cx="40.9" cy="31.9" r="1.1" fill="#fff"/>
-            <ellipse cx="32" cy="42" rx="2.4" ry="1.8" fill="#2E3A4D"/>
-            <path d="M26 47 q6 5 12 0" stroke="#2E3A4D" stroke-width="2" fill="none" stroke-linecap="round"/>
-          </svg>
+          <img class="fz-avatar-img" src="./avatar.jpg" alt="反诈小易" />
         </div>
 
         <div class="fz-bubble" :class="m.role">
@@ -383,8 +364,9 @@ onMounted(() => { resetChat() })
   width: 46px; height: 46px; border-radius: 50%;
   background: #fff; display: flex; align-items: center; justify-content: center;
   box-shadow: inset 0 -2px 6px rgba(74, 143, 231, .25), 0 2px 6px rgba(0,0,0,.08);
-  flex-shrink: 0;
+  flex-shrink: 0; overflow: hidden;
 }
+.fz-mascot-img { width: 100%; height: 100%; object-fit: cover; }
 .fz-h-info { min-width: 0; }
 .fz-h-name { font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
 .fz-h-badge {
@@ -429,8 +411,9 @@ onMounted(() => { resetChat() })
 .fz-row.user { flex-direction: row-reverse; }
 @keyframes fz-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 
-.fz-avatar { width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+.fz-avatar { width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; }
 .fz-avatar-bot { background: #fff; box-shadow: 0 2px 8px rgba(74,143,231,.2); }
+.fz-avatar-img { width: 100%; height: 100%; object-fit: cover; }
 .fz-avatar-user { background: linear-gradient(135deg, #FFC53D, #FFB03A); color: #7A5200; font-size: 13px; font-weight: 700; }
 
 .fz-bubble {
