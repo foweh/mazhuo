@@ -26,8 +26,8 @@
   </style>
 </head>
 <body>
-  <div id="app">
-    <div class="boot" id="boot">
+  <div id="app"></div>
+  <div class="boot" id="boot">
       <svg class="bear" viewBox="0 0 64 64">
         <circle cx="14" cy="18" r="9" fill="#6FA8F0"/><circle cx="50" cy="18" r="9" fill="#6FA8F0"/>
         <circle cx="14" cy="18" r="4.5" fill="#FFD9A8"/><circle cx="50" cy="18" r="4.5" fill="#FFD9A8"/>
@@ -43,7 +43,6 @@
       <div class="spin"></div>
       <div class="err" id="bootErr"></div>
     </div>
-  </div>
 
   <script>
   /* CDN 容灾链：jsdelivr → unpkg → bootcdn（按序尝试，全部失败才报错） */
@@ -73,6 +72,7 @@
 
   function bootError(msg) {
     var e = document.getElementById('bootErr');
+    if (!e) return;
     e.style.display = 'block';
     e.textContent = msg;
   }
@@ -100,15 +100,20 @@
             };
           });
         },
-        addStyle: true
+        // 0.9.x：addStyle 必须是函数（旧版 addStyle: true 布尔写法已失效）
+        addStyle: function (styleContent) {
+          var st = document.createElement('style');
+          st.textContent = styleContent;
+          document.head.appendChild(st);
+        }
       };
-      var App = Vue.defineAsyncComponent(function () {
-        return loader.loadModule('./ChatPage.vue', options);
-      });
-      Vue.createApp({ render: function () { return Vue.h(App); } }).mount('#app');
-      document.getElementById('boot').style.display = 'none';
+      // 先 await 编译 .vue，加载失败能走进 catch 给出友好提示
+      var component = await loader.loadModule('./ChatPage.vue', options);
+      Vue.createApp(component).mount('#app');
+      var bootEl = document.getElementById('boot');
+      if (bootEl) bootEl.style.display = 'none';
     } catch (err) {
-      bootError('页面启动失败：' + err.message + '\n请确认 ChatPage.vue 与本文件在同一目录。');
+      bootError('页面启动失败：' + (err && err.message ? err.message : err) + '\n请确认 ChatPage.vue 与本文件在同一目录，且网络能访问 CDN。');
     }
   })();
   </script>
