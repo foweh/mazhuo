@@ -91,7 +91,8 @@
       var options = {
         moduleCache: { vue: Vue },
         getFile: function (url) {
-          return fetch(url).then(function (r) {
+          // cache: 'no-store' —— 每次强制拉取最新 .vue，避免浏览器缓存旧版导致异常
+          return fetch(url, { cache: 'no-store' }).then(function (r) {
             if (!r.ok) throw new Error('HTTP ' + r.status + ' (' + url + ')');
             return {
               getContentData: function (asBinary) {

@@ -4,7 +4,7 @@
     <!-- ======= 顶栏 ======= -->
     <header class="fz-header">
       <div class="fz-h-left">
-        <div class="fz-mascot" role="img" aria-label="反诈小易"></div>
+        <div class="fz-mascot"><img class="fz-mascot-img" :src="avatarSrc" alt="反诈小易" /></div>
         <div class="fz-h-info">
           <div class="fz-h-name">反诈小易<span class="fz-h-badge">校园反诈智能体</span></div>
           <div class="fz-h-status"><span class="fz-dot"></span>7×24 在线 · 已守护 {{ guardCount }} 次</div>
@@ -31,7 +31,7 @@
     <!-- ======= 消息区 ======= -->
     <main class="fz-body" ref="bodyRef">
       <div v-for="(m, i) in messages" :key="i" class="fz-row" :class="m.role">
-        <div v-if="m.role === 'assistant'" class="fz-avatar fz-avatar-bot" role="img" aria-label="反诈小易"></div>
+        <div v-if="m.role === 'assistant'" class="fz-avatar fz-avatar-bot"><img class="fz-avatar-img" :src="avatarSrc" alt="反诈小易" /></div>
 
         <div class="fz-bubble" :class="m.role">
           <div v-if="m.role === 'assistant' && i === 0" class="fz-welcome">
@@ -95,6 +95,9 @@
 
 <script setup>
 import { ref, computed, nextTick, onMounted } from 'vue'
+
+/* 头像图片：动态绑定相对路径，避免 SFC 编译器把静态资源改写为模块导入 */
+const avatarSrc = './avatar.jpg'
 
 /* ================================================================
  * 密钥配置区 —— 多层混淆存储（反转 + 分段 + 异或 + HEX）
@@ -358,10 +361,11 @@ onMounted(() => { resetChat() })
 .fz-h-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
 .fz-mascot {
   width: 46px; height: 46px; border-radius: 50%;
-  background: #fff url('./avatar.jpg') center/cover no-repeat;
+  background: #fff; display: flex; align-items: center; justify-content: center;
   box-shadow: inset 0 -2px 6px rgba(74, 143, 231, .25), 0 2px 6px rgba(0,0,0,.08);
   flex-shrink: 0; overflow: hidden;
 }
+.fz-mascot-img { width: 100%; height: 100%; object-fit: cover; }
 .fz-h-info { min-width: 0; }
 .fz-h-name { font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
 .fz-h-badge {
@@ -407,7 +411,8 @@ onMounted(() => { resetChat() })
 @keyframes fz-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 
 .fz-avatar { width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-.fz-avatar-bot { background: #fff url('./avatar.jpg') center/cover no-repeat; box-shadow: 0 2px 8px rgba(74,143,231,.2); }
+.fz-avatar-bot { background: #fff; box-shadow: 0 2px 8px rgba(74,143,231,.2); }
+.fz-avatar-img { width: 100%; height: 100%; object-fit: cover; }
 .fz-avatar-user { background: linear-gradient(135deg, #FFC53D, #FFB03A); color: #7A5200; font-size: 13px; font-weight: 700; }
 
 .fz-bubble {
