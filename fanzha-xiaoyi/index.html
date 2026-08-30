@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+  <title>反诈小易 · 校园反诈智能体</title>
+  <meta name="description" content="反诈小易——校园反诈 AIGC 趣味教育智能体：海龟汤 / 剧本杀 / 火眼金睛 / PK晋级赛，覆盖 19 种诈骗类型，7×24 在线。" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='14' cy='18' r='9' fill='%236FA8F0'/%3E%3Ccircle cx='50' cy='18' r='9' fill='%236FA8F0'/%3E%3Ccircle cx='32' cy='36' r='22' fill='%236FA8F0'/%3E%3Cellipse cx='32' cy='43' rx='11' ry='9' fill='%23FFF6E8'/%3E%3Ccircle cx='24' cy='33' r='3' fill='%232E3A4D'/%3E%3Ccircle cx='40' cy='33' r='3' fill='%232E3A4D'/%3E%3Cellipse cx='32' cy='42' rx='2.4' ry='1.8' fill='%232E3A4D'/%3E%3Cpath d='M26 47 q6 5 12 0' stroke='%232E3A4D' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E" />
+  <style>
+    html, body { margin: 0; height: 100%; background: #F4F7FC; }
+    #app { height: 100%; }
+    .boot {
+      position: fixed; inset: 0; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 14px;
+      font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      color: #8A94A6; font-size: 14px; background: #F4F7FC;
+    }
+    .boot .bear { width: 64px; height: 64px; animation: bob 1.6s ease-in-out infinite; }
+    @keyframes bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+    .boot .spin {
+      width: 20px; height: 20px; border: 3px solid #D7E4F7; border-top-color: #4A8FE7;
+      border-radius: 50%; animation: rot .8s linear infinite;
+    }
+    @keyframes rot { to { transform: rotate(360deg); } }
+    .boot .err { display: none; color: #FF6B6B; font-size: 13px; max-width: 300px; text-align: center; line-height: 1.7; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="boot" id="boot">
+      <svg class="bear" viewBox="0 0 64 64">
+        <circle cx="14" cy="18" r="9" fill="#6FA8F0"/><circle cx="50" cy="18" r="9" fill="#6FA8F0"/>
+        <circle cx="14" cy="18" r="4.5" fill="#FFD9A8"/><circle cx="50" cy="18" r="4.5" fill="#FFD9A8"/>
+        <circle cx="32" cy="36" r="22" fill="#6FA8F0"/>
+        <ellipse cx="32" cy="43" rx="11" ry="9" fill="#FFF6E8"/>
+        <circle cx="24" cy="33" r="3" fill="#2E3A4D"/><circle cx="40" cy="33" r="3" fill="#2E3A4D"/>
+        <circle cx="24.9" cy="31.9" r="1.1" fill="#fff"/><circle cx="40.9" cy="31.9" r="1.1" fill="#fff"/>
+        <ellipse cx="32" cy="42" rx="2.4" ry="1.8" fill="#2E3A4D"/>
+        <path d="M26 47 q6 5 12 0" stroke="#2E3A4D" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <circle cx="17" cy="31" r="2.6" fill="#FF9F9F" opacity=".8"/><circle cx="47" cy="31" r="2.6" fill="#FF9F9F" opacity=".8"/>
+      </svg>
+      <div>正在加载反诈小易…</div>
+      <div class="spin"></div>
+      <div class="err" id="bootErr"></div>
+    </div>
+  </div>
+
+  <script>
+  /* CDN 容灾链：jsdelivr → unpkg → bootcdn（按序尝试，全部失败才报错） */
+  var VUE_CDNS = [
+    'https://cdn.jsdelivr.net/npm/vue@3.4.21/dist/vue.global.prod.js',
+    'https://unpkg.com/vue@3.4.21/dist/vue.global.prod.js',
+    'https://cdn.bootcdn.net/ajax/libs/vue/3.3.4/vue.global.prod.min.js'
+  ];
+  var LOADER_CDNS = [
+    'https://cdn.jsdelivr.net/npm/vue3-sfc-loader@0.9.5/dist/vue3-sfc-loader.js',
+    'https://unpkg.com/vue3-sfc-loader@0.9.5/dist/vue3-sfc-loader.js'
+  ];
+
+  function loadScript(urls) {
+    return new Promise(function (resolve, reject) {
+      var i = 0;
+      (function tryNext() {
+        if (i >= urls.length) return reject(new Error('CDN 全部不可达'));
+        var s = document.createElement('script');
+        s.src = urls[i++];
+        s.onload = function () { resolve(); };
+        s.onerror = function () { s.remove(); tryNext(); };
+        document.head.appendChild(s);
+      })();
+    });
+  }
+
+  function bootError(msg) {
+    var e = document.getElementById('bootErr');
+    e.style.display = 'block';
+    e.textContent = msg;
+  }
+
+  (async function () {
+    try {
+      await loadScript(VUE_CDNS);
+      await loadScript(LOADER_CDNS);
+    } catch (err) {
+      bootError('加载依赖失败：' + err.message + '。\n请检查网络后刷新重试（此页面需要联网加载 Vue 运行时）。');
+      return;
+    }
+
+    try {
+      var loader = window['vue3-sfc-loader'];
+      var options = {
+        moduleCache: { vue: Vue },
+        getFile: function (url) {
+          return fetch(url).then(function (r) {
+            if (!r.ok) throw new Error('HTTP ' + r.status + ' (' + url + ')');
+            return r.text();
+          });
+        },
+        addStyle: true
+      };
+      var App = loader.defineAsyncComponent(function () {
+        return loader.loadModule('./ChatPage.vue', options);
+      });
+      Vue.createApp({ render: function () { return Vue.h(App); } }).mount('#app');
+      document.getElementById('boot').style.display = 'none';
+    } catch (err) {
+      bootError('页面启动失败：' + err.message + '\n请确认 ChatPage.vue 与本文件在同一目录。');
+    }
+  })();
+  </script>
+</body>
+</html>
