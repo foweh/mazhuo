@@ -49,8 +49,6 @@
             <span></span><span></span><span></span>
           </div>
         </div>
-
-        <div v-if="m.role === 'user'" class="fz-avatar fz-avatar-user">{{ userInitial }}</div>
       </div>
     </main>
 
@@ -153,7 +151,6 @@ const sending = ref(false)
 const sosOpen = ref(false)
 const score = ref(0)
 const guardCount = ref(0)
-const userInitial = ref('我')
 
 const WELCOME = '哈喽～我是**反诈小易**！专属校园趣味反诈宣传员，易班熊警长的 AI 助手🐻\n\n想玩什么？直接告诉我：\n①**海龟汤**（AI出题 / 我要出题）\n②**剧本杀**（单人模拟 / 多人联机）\n③**火眼金睛**（辨真假）\n④**PK晋级赛**（知识闯关）\n⑤**查知识**（19 种诈骗类型）\n⑥**提交案例**（可传图）\n⑦**紧急求助**\n\n也可以直接提问，比如：**刷单返利是诈骗吗？**'
 
@@ -413,7 +410,6 @@ onMounted(() => { resetChat() })
 .fz-avatar { width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; }
 .fz-avatar-bot { background: #fff; box-shadow: 0 2px 8px rgba(74,143,231,.2); }
 .fz-avatar-img { width: 100%; height: 100%; object-fit: cover; }
-.fz-avatar-user { background: linear-gradient(135deg, #FFC53D, #FFB03A); color: #7A5200; font-size: 13px; font-weight: 700; }
 
 .fz-bubble {
   max-width: 78%; padding: 10px 14px; border-radius: var(--radius-md);
