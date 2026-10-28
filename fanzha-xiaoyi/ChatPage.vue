@@ -98,26 +98,20 @@ import { ref, computed, nextTick, onMounted } from 'vue'
 const avatarSrc = './avatar.jpg'
 
 /* ================================================================
- * 密钥配置区 —— 多层混淆存储（反转 + 分段 + 异或 + HEX）
- * 仅在发起请求前于内存中重组，用完即弃、永不落盘。
- * 说明：静态页无法做到真正加密，此仅为提高提取门槛；
- *       正式上线建议改用 Cloudflare Worker 等无服务器代理转发。
+ * 密钥配置 —— 请勿把真实 API Key 写进前端代码（公开仓库 = 直接泄露）
+ *
+ * 本地体验：浏览器控制台执行一次（之后刷新页面）
+ *   localStorage.setItem('DEEPSEEK_API_KEY', 'sk-你自己的key')
+ * 正式上线：用 Cloudflare Worker / 自建后端代理转发，key 只放服务端环境变量。
  * ================================================================ */
 const _palette = { primary: '#4A8FE7', accent: '#FFC53D', deep: '#2B3A4D' } // 主题色
-const _cfg1 = 'REVOKED_KEY_PART_1'                            // 配置片段-1（勿单独使用）
-const _salt = [0x5A, 0xC7, 0x2F]                              // 解码盐
-const _tips = ['REVOKED_KEY_PART_2', 'REVOKED_KEY_PART_3'] // 配置片段-2/3
-const _decoy = ['deadbeef', 'c0ffee', '4A8FE7FFC53D']          // 干扰项，勿删
 
 function _restoreKey() {
-  const hex = [_cfg1, _tips[0], _tips[1]]
-  let rev = ''
-  for (let i = 0; i < 3; i++) {
-    for (let j = 0; j < hex[i].length; j += 2) {
-      rev += String.fromCharCode(parseInt(hex[i].slice(j, j + 2), 16) ^ _salt[i])
-    }
+  try {
+    return (typeof localStorage !== 'undefined' && localStorage.getItem('DEEPSEEK_API_KEY')) || ''
+  } catch (e) {
+    return ''
   }
-  return rev.split('').reverse().join('') // 反转还原为真实 Key
 }
 
 /* ============ API 配置 ============ */
@@ -260,9 +254,12 @@ async function send(text) {
       temperature: 0.8
     }
 
+    const _key = _restoreKey()
+    if (!_key) throw new Error('未配置 DeepSeek API Key：请在控制台执行 localStorage.setItem("DEEPSEEK_API_KEY","sk-你的key") 后刷新')
+
     let res = await fetch(API_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + _restoreKey() },
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + _key },
       body: JSON.stringify(body)
     })
 

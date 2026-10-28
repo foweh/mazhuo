@@ -38,31 +38,18 @@
 
 ## 密钥说明（重要）
 
-DeepSeek API Key 以**混淆形式**存储于 `ChatPage.vue` 顶部：
+**本仓库不包含任何 API Key。** 早期演示版把 DeepSeek key 混淆后写进了 `ChatPage.vue`，现已全部移除——静态网页无法真正保密，混淆只是抬高"随手复制"的门槛，DevTools 断点即可还原。
 
-- 混淆方式：字符串反转 → 三段拆分 → 逐字节异或 → HEX 编码，运行时在内存中重组，用完即弃
-- ⚠️ **诚实声明**：静态网页无法真正加密。此方案只能提高"随手复制"的提取门槛，无法抵御故意逆向（DevTools 断点即可还原）
-- 该 key 余额约 2 元，建议：
-  1. 演示结束后在 [platform.deepseek.com](https://platform.deepseek.com) **重置/删除**该 key
-  2. 正式上线请改用 **Cloudflare Workers 免费代理**转发请求（key 只存服务端，浏览器拿不到），可参考下方代码
-  3. 页面上的 `Authorization` 请求头拦截器/代理工具都能看到明文 key，属于同类风险
+本地自己跑：
 
-### 更换/重新混淆 key 的方法
-
-打开 `ChatPage.vue`，修改顶部配置区三个片段，可用下面的命令重新生成（Windows PowerShell / Python）：
-
-```python
-# python 一键生成混淆片段
-key = "sk-你的新密钥"
-rev = key[::-1]
-salts = [0x5A, 0xC7, 0x2F]
-parts = [rev[:9], rev[9:19], rev[19:]]
-for i, p in enumerate(parts):
-    print(f"片段{i+1} HEX:", bytes(b ^ salts[i] for b in p.encode()).hex().upper())
-# 把输出的 3 段 HEX 依次填入 ChatPage.vue 的 _cfg1 / _tips[0] / _tips[1]
+```js
+// 打开页面后，在浏览器控制台执行一次，然后刷新
+localStorage.setItem('DEEPSEEK_API_KEY', 'sk-你自己的key')
 ```
 
-### 进阶：Cloudflare Workers 代理（真隐藏 key，推荐正式版）
+没配置 key 时，页面会直接提示，不会发出请求。正式上线请用下面的 **Cloudflare Workers 代理**，key 只存服务端，浏览器拿不到。
+
+### Cloudflare Workers 代理（推荐正式版）
 
 ```js
 // worker.js —— 部署为 Cloudflare Worker 后，前端改为请求你的 worker 域名
